@@ -18,27 +18,31 @@ def createParser ():
     get.add_argument ('-a', '--all', action='store_const', const=True, default=False)
 
     delete = subparsers.add_parser('delete')
-    delete.add_argument ('-d', '--date', default=False)
-    get.add_argument ('-n', '--number', type=int, default=1)
-    get.add_argument ('-a', '--all', action='store_const', const=True, default=False)
+    delete.add_argument ('-n', '--number', type=int)
+    delete.add_argument ('-a', '--all', action='store_const', const=True, default=False)
 
     edit = subparsers.add_parser('edit')
-    edit.add_argument ('-n', '--number', type=int, default=1)
+    edit.add_argument ('-n', '--number', type=int)
+    edit.add_argument ('-t', '--title')
+    edit.add_argument ('-m', '--message')
+    edit.add_argument ('-d', '--date')
     
- 
     return parser
 
 def main():
     parser = createParser()
     namespace = parser.parse_args(sys.argv[1:])
-    print (namespace)
-    #note = Note(namespace.title, namespace.message)
-    if namespace.comand == "add":
+    if namespace.command == "add":
         response = model.write(namespace)
-        view.printStatus(response)
+        view.printAdd(response)
     elif namespace.command == "get":
         notes = model.read(namespace)
-        view.printNotes(notes)
+        if (isinstance(notes, list)):
+            view.printNotes(notes)
+        elif (isinstance(notes, model.Note)):
+            view.printNote(notes)
+        else:
+            view.printStatus(notes)
     elif namespace.command == "delete":
         response = model.delete(namespace)
         view.printStatus(response)
