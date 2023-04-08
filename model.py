@@ -1,6 +1,7 @@
 import json
 # from classes.note import *
 import datetime
+import re
 
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -26,6 +27,7 @@ class Note(Base):
     title = Column(String)
     message = Column(String)
     date = Column(String)
+    time = Column(String)
 
 # создаем таблицы
 Base.metadata.create_all(bind=engine)
@@ -38,7 +40,8 @@ db = SessionLocal()
 def write(data):
     date = datetime.datetime.now()
     str_date = date.strftime("%d/%m/%Y")
-    note = Note(title=data.title, message=data.message, date=str_date)
+    str_time = date.strftime("%H:%M:%S")
+    note = Note(title=data.title, message=data.message, date=str_date, time=str_time)
     db.add(note)
     db.commit()
     db.refresh(note)
@@ -50,6 +53,9 @@ def read(param):
         data = db.query(Note).all()
     elif param.number:
         data = db.query(Note).filter(Note.id == param.number).first()
+    elif param.date:
+        data = db.query(Note).filter(Note.date == param.date).all()
+        print(param.date)
     else:
         return -1
     return data
@@ -60,7 +66,7 @@ def delete(param):
         data = db.query(Note).all()
         for n in data:
             db.delete(n)
-        db.commit()
+            db.commit()
     elif param.number:
         data = db.query(Note).filter(Note.id == param.number).first()
         if data != None:
@@ -82,7 +88,10 @@ def edit(param):
             if param.message:
                 data.message = param.message
             if param.date:
-                data.date = param.date #можно сделать проверку на соответствие формату
+                if re.match(r'\d\d\/\d\d\.\d{4}', param.date): #можно усложнить проверку
+                    data.date = param.date
+                else:
+                    return -2 
             db.commit()
         else:
             return -1

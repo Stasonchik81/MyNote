@@ -3,7 +3,7 @@ import argparse
 import model
 import view
 
-
+# Парсер командной строки
 def createParser ():
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers (dest='command')
@@ -14,7 +14,7 @@ def createParser ():
 
     get = subparsers.add_parser('get')
     get.add_argument ('-d', '--date', default=False)
-    get.add_argument ('-n', '--number', type=int, default=1)
+    get.add_argument ('-n', '--number', type=int)
     get.add_argument ('-a', '--all', action='store_const', const=True, default=False)
 
     delete = subparsers.add_parser('delete')
@@ -32,6 +32,7 @@ def createParser ():
 def main():
     parser = createParser()
     namespace = parser.parse_args(sys.argv[1:])
+    print(namespace)
     if namespace.command == "add":
         response = model.write(namespace)
         view.printAdd(response)
